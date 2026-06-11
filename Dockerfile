@@ -25,6 +25,13 @@ RUN echo '<Directory /var/www/html/>\n\
 </Directory>' > /etc/apache2/conf-available/custom.conf \
     && a2enconf custom
 
+# Set default port env (overridden by Railway at runtime)
+ENV PORT=80
+
+# Update Apache port config to listen on the dynamic port
+RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf \
+    && sed -i 's/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/g' /etc/apache2/sites-available/000-default.conf
+
 # Salin semua file proyek ke web root
 COPY . /var/www/html/
 
@@ -39,3 +46,4 @@ RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 /var/www/html/config
 
 EXPOSE 80
+
