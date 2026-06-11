@@ -14,8 +14,11 @@ RUN apt-get update && apt-get install -y \
 RUN curl -sS https://getcomposer.org/installer | php \
     && mv composer.phar /usr/local/bin/composer
 
-# Aktifkan mod_rewrite Apache
-RUN a2enmod rewrite
+# Nonaktifkan MPM conflicting (event/worker) dan paksa gunakan prefork (standar PHP Apache)
+RUN a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork \
+    && a2enmod rewrite
+
 
 # Konfigurasi Apache: aktifkan AllowOverride untuk .htaccess
 RUN echo '<Directory /var/www/html/>\n\
