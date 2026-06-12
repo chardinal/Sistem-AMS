@@ -20,11 +20,12 @@ RedirectMatch 403 ^/config/.*$
 RedirectMatch 403 ^/database/.*$
 
 # Proteksi file konfigurasi
-<Files "docker-compose.yml">
+<Files "composer.json">
     Order allow,deny
     Deny from all
 </Files>
-<Files "Dockerfile">
+<Files "composer.lock">
     Order allow,deny
     Deny from all
 </Files>
+

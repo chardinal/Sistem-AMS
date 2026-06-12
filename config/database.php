@@ -1,8 +1,8 @@
 <?php
 // ============================================================
 // AMS — Database Configuration
-// Sesuaikan DB_HOST, DB_USER, DB_PASS jika perlu.
-// Database 'ams_db' akan dibuat OTOMATIS jika belum ada.
+// Koneksi ke Railway MySQL (atau localhost untuk dev lokal).
+// Environment variables otomatis di-inject oleh Railway.
 // ============================================================
 
 // ── Konfigurasi Session (HARUS sebelum session_start) ────────
@@ -18,13 +18,16 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Baca dari environment variable (Docker/Vercel) — fallback ke nilai default (Laragon/XAMPP)
-$dbHost = $_ENV['DB_HOST'] ?? $_SERVER['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost';
-$dbName = $_ENV['DB_NAME'] ?? $_SERVER['DB_NAME'] ?? getenv('DB_NAME') ?: 'ams_db';
-$dbUser = $_ENV['DB_USER'] ?? $_SERVER['DB_USER'] ?? getenv('DB_USER') ?: 'root';
-$dbPass = $_ENV['DB_PASS'] ?? $_SERVER['DB_PASS'] ?? getenv('DB_PASS') ?: '';
+// Baca dari environment variable Railway (MYSQLHOST, MYSQLPORT, dll)
+// Fallback ke nilai default untuk development lokal (Laragon/XAMPP)
+$dbHost = getenv('MYSQLHOST')     ?: 'localhost';
+$dbPort = getenv('MYSQLPORT')     ?: '3306';
+$dbName = getenv('MYSQLDATABASE') ?: 'ams_db';
+$dbUser = getenv('MYSQLUSER')     ?: 'root';
+$dbPass = getenv('MYSQLPASSWORD') ?: '';
 
 define('DB_HOST', $dbHost);
+define('DB_PORT', (int) $dbPort);
 define('DB_NAME', $dbName);
 define('DB_USER', $dbUser);
 define('DB_PASS', $dbPass);
@@ -60,7 +63,7 @@ set_exception_handler(function (Throwable $e): void {
     <html lang="id">
     <head>
         <meta charset="UTF-8">
-        <title>Terjadi Kesalahan — AMS</title>
+        <title>Terjadi Kesalahan - AMS</title>
         <style>
             body { font-family: Inter, Arial, sans-serif; background: #F8FAFC;
                    display: flex; align-items: center; justify-content: center;
@@ -97,7 +100,7 @@ set_exception_handler(function (Throwable $e): void {
 
 /**
  * Mengembalikan instance PDO (singleton).
- * Otomatis membuat database jika belum ada.
+ * Koneksi langsung ke database Railway / lokal.
  */
 function getDB(): PDO
 {
@@ -105,21 +108,10 @@ function getDB(): PDO
     if ($pdo !== null) return $pdo;
 
     try {
-        // ── Tahap 1: Koneksi tanpa nama DB dulu ──────────────
-        $dsnNoDB = sprintf('mysql:host=%s;charset=%s', DB_HOST, DB_CHARSET);
-        $tmp = new PDO($dsnNoDB, DB_USER, DB_PASS, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        ]);
-
-        // Buat database jika belum ada
-        $tmp->exec(
-            "CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "`
-             CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+        $dsn = sprintf(
+            'mysql:host=%s;port=%d;dbname=%s;charset=%s',
+            DB_HOST, DB_PORT, DB_NAME, DB_CHARSET
         );
-        $tmp = null; // tutup koneksi sementara
-
-        // ── Tahap 2: Koneksi ke database yang sudah pasti ada ─
-        $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', DB_HOST, DB_NAME, DB_CHARSET);
         $pdo = new PDO($dsn, DB_USER, DB_PASS, [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -136,14 +128,14 @@ function getDB(): PDO
             <p style="margin:0 0 14px">' . htmlspecialchars($e->getMessage()) . '</p>
             <hr style="border:none;border-top:1px solid #FECACA;margin:14px 0">
             <p style="margin:0;font-size:13px;color:#B91C1C">
-                Pastikan MySQL sedang berjalan di Laragon,<br>
-                lalu cek konfigurasi di <code>config/database.php</code>:<br><br>
+                Pastikan konfigurasi database sudah benar.<br>
                 DB_HOST = <strong>' . DB_HOST . '</strong><br>
-                DB_USER = <strong>' . DB_USER . '</strong><br>
-                DB_PASS = <strong>(kosong jika tidak ada password)</strong>
+                DB_PORT = <strong>' . DB_PORT . '</strong><br>
+                DB_NAME = <strong>' . DB_NAME . '</strong>
             </p>
         </div>');
     }
 
     return $pdo;
 }
+

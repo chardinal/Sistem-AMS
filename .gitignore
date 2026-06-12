@@ -1,5 +1,5 @@
 # ============================================================
-# .gitignore — Sistem Audit BSPJI
+# .gitignore — Sistem AMS (Railway Hosting)
 # ============================================================
 
 # Dependensi Composer (generate ulang via composer install)
@@ -25,3 +25,22 @@ desktop.ini
 .idea/
 *.swp
 *.swo
+
+# ── File tidak perlu untuk hosting ──────────────────
+# Docker (tidak dipakai di Railway)
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Vercel (tidak dipakai)
+vercel.json
+
+# Setup & seeder (data sudah ada di DB)
+setup.php
+
+# Database schema (sudah di-import)
+/database/
+
+# Dokumentasi
+README.md
+
