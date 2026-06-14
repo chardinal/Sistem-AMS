@@ -20,11 +20,11 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Baca dari environment variable Railway (MYSQLHOST, MYSQLPORT, dll)
 // Fallback ke nilai default untuk development lokal (Laragon/XAMPP)
-$dbHost = $_ENV['MYSQLHOST']      ?? $_SERVER['MYSQLHOST']      ?? 'localhost';
-$dbPort = $_ENV['MYSQLPORT']      ?? $_SERVER['MYSQLPORT']      ?? '3306';
-$dbName = $_ENV['MYSQLDATABASE']  ?? $_SERVER['MYSQLDATABASE']  ?? 'ams_db';
-$dbUser = $_ENV['MYSQLUSER']      ?? $_SERVER['MYSQLUSER']      ?? 'root';
-$dbPass = $_ENV['MYSQLPASSWORD']  ?? $_SERVER['MYSQLPASSWORD']  ?? '';
+$dbHost = $_ENV['MYSQLHOST']     ?? $_SERVER['MYSQLHOST'] ?? 'localhost';
+$dbPort = $_ENV['MYSQLPORT']     ?? $_SERVER['MYSQLPORT'] ?? '3306';
+$dbName = $_ENV['MYSQLDATABASE'] ?? $_SERVER['MYSQLDATABASE'] ?? 'ams_db';
+$dbUser = $_ENV['MYSQLUSER']     ?? $_SERVER['MYSQLUSER'] ?? 'root';
+$dbPass = $_ENV['MYSQLPASSWORD'] ?? $_SERVER['MYSQLPASSWORD'] ?? '';
 
 define('DB_HOST', $dbHost);
 define('DB_PORT', (int) $dbPort);
