@@ -17,6 +17,9 @@ RUN curl -sS https://getcomposer.org/installer | php \
 # Salin semua file proyek
 COPY . /app/
 
+# Create Caddyfile for FrankenPHP
+RUN echo ':8080 {\n\troot * /app\n\tencode gzip\n\tphp_fastcgi localhost:9000\n\tfile_server\n\ttry_files {path} {path}/ /index.php?{query}\n}' > /app/Caddyfile
+
 # Install Composer dependencies
 WORKDIR /app
 RUN composer install --no-dev --optimize-autoloader --no-interaction
